@@ -1,0 +1,149 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand .logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: #555;
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #007bff;
+}
+
+
+header {
+    background: linear-gradient(to right, #007bff, #0056b3);
+    color: white;
+    text-align: center;
+    padding: 100px 15px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+}
+
+header h4 {
+    margin-bottom: 40px;
+}
+
+header p {
+    font-size: 0.9rem;
+    margin-bottom: 5px; 
+    text-align: left; 
+    margin-left: 5px; 
+}
+
+header .form-control {
+    text-align: left;
+}
+
+header .search-bar .row > div {
+    display: flex;
+    flex-direction: column; 
+    align-items: stretch; 
+}
+
+header .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    height: calc(1.5em + 1rem + 2px); 
+    margin-top: 1.5rem; 
+}
+
+section {
+    padding: 60px 15px;
+}
+
+section h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+section p {
+    color: #555;
+    font-size: 1rem;
+}
+
+.bg-light {
+    background-color: #f8f9fa;
+}
+
+.bg-white {
+    background-color: white;
+}
+
+section#features .col-md-4 {
+    margin-bottom: 30px;
+}
+
+section#features i {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+section#features h4 {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    color: #333;
+}
+
+section#features p {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+
+form .form-control {
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+form button {
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+footer {
+    background: #007bff;
+    color: white;
+    padding: 15px 0;
+    font-size: 0.9rem;
+}
+
+footer p {
+    margin: 0;
+}
+
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    header p {
+        font-size: 1rem;
+    }
+
+    section h2 {
+        font-size: 1.5rem;
+    }
+}
