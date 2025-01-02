@@ -57,8 +57,8 @@ h1 {
 
 form {
     display: flex;
-    flex-direction: column; /* Flexbox ile dikey hizalama */
-    gap: 20px; /* Input ve button arasına boşluk ekler */
+    flex-direction: column; 
+    gap: 20px; 
 }
 
 input {
@@ -89,14 +89,13 @@ button {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease-in-out;
-    margin-top: 12px;  /* Input ve buton arasına boşluk eklemek için */
+    margin-top: 12px; 
 }
 
 button:hover {
     background-color: #0056b3;
 }
 
-/* Success ve Error mesajları için stil */
 .success-message,
 .error-message {
     padding: 15px;
@@ -108,7 +107,6 @@ button:hover {
     transition: all 0.3s ease-in-out;
 }
 
-/* Success mesajı için yeşil renk ve icon */
 .success-message {
     background-color: #d4edda;
     color: #155724;
@@ -124,7 +122,6 @@ button:hover {
     color: #155724;
 }
 
-/* Error mesajı için kırmızı renk ve icon */
 .error-message {
     background-color: #f8d7da;
     color: #721c24;
@@ -140,7 +137,6 @@ button:hover {
     color: #721c24;
 }
 
-/* Animasyon ekleyebiliriz */
 .success-message,
 .error-message {
     animation: fadeIn 0.5s ease-in-out;
