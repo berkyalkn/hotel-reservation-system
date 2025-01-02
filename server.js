@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import mysql from "mysql2";
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
@@ -23,6 +24,37 @@ db.connect((err) => {
     }
     console.log('Successfully connected to database');
 });
+
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_USER, 
+        pass: process.env.GMAIL_PASS 
+    }
+});
+
+
+const sendEmail = (to, subject, text) => {
+    const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: to, 
+        subject: subject, 
+        text: text 
+    };
+
+    return new Promise((resolve, reject) => {
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                console.error('An error occurred while sending the email:', err);
+                reject(err);
+            } else {
+                console.log('The email was sent successfully:', info.response);
+                resolve(info);
+            }
+        });
+    });
+};
 
 const app = express();
 app.use(express.json());
@@ -103,7 +135,38 @@ app.post('/reset-password', (req, res) => {
 
         console.log('Email found! Resetting password...');
 
-        return res.status(200).json({ message: 'Password reset link sent to your email.' });
+         try {
+            const emailSubject = "Password Reset Request";
+            const emailText = `Click the link to reset your password:\n\nhttp://localhost:3000/reset-password2?email=${email}`;
+            await sendEmail(email, emailSubject, emailText);
+            return res.status(200).json({ message: 'Password reset link sent to your email.' });
+        } catch (error) {
+            return res.status(500).json({ message: 'Error sending reset link.' });
+        }
+    });
+});
+
+
+app.get('/reset-password2', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'reset_password2.html'));
+});
+
+app.post('/update-password', async (req, res) => {
+    const { email, newPassword } = req.body;
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const query = `UPDATE users SET password = ? WHERE email = ?`;
+    db.execute(query, [hashedPassword, email], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(400).json({ message: 'Email not found' });
+        }
+
+        return res.status(200).json({ message: 'Password updated successfully' });
     });
 });
 
