@@ -6,10 +6,8 @@ import mysql from "mysql2";
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 
-// .env dosyasını kullanmak için
 dotenv.config();
 
-// MySQL bağlantısı
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -17,13 +15,13 @@ const db = mysql.createConnection({
     database: process.env.DB_NAME
 });
 
-// Bağlantıyı test etme
+
 db.connect((err) => {
     if (err) {
-        console.error('Veritabanına bağlanırken hata oluştu:', err.stack);
+        console.error('An error occured while connecting to the database: ', err.stack);
         return;
     }
-    console.log('Veritabanına başarıyla bağlanıldı');
+    console.log('Successfully connected to database');
 });
 
 const app = express();
@@ -42,14 +40,12 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));;
 });
 
-// Register endpoint
+
 app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
-    // Password hash işlemi
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Kullanıcıyı veritabanına ekleyelim
     const query = `INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, NOW())`;
 
     db.execute(query, [username, email, hashedPassword], (err, result) => {
@@ -64,11 +60,9 @@ app.post('/register', async (req, res) => {
     });
 });
 
-//Login endpoint
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
-    // Kullanıcıyı veritabanından bulalım
     const query = `SELECT * FROM users WHERE username = ?`;
     db.execute(query, [username], async (err, result) => {
         if (err) {
@@ -80,7 +74,6 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'User not found!' });
         }
 
-        // Şifreyi kontrol edelim
         const user = result[0];
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
@@ -89,12 +82,30 @@ app.post('/login', async (req, res) => {
         }
 
         console.log('Login successful!');
-        // Başarılı login: Session ya da JWT token alabiliriz
-        // Burada sadece başarılı login yanıtı döneceğiz
         return res.status(200).json({ message: 'Login successful!' });
     });
 });
 
+
+app.post('/reset-password', (req, res) => {
+    const { email } = req.body;
+
+    const query = `SELECT * FROM users WHERE email = ?`;
+    db.execute(query, [email], async (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Database error!' });
+        }
+
+        if (result.length === 0) {
+            return res.status(400).json({ message: 'Email not found!' });
+        }
+
+        console.log('Email found! Resetting password...');
+
+        return res.status(200).json({ message: 'Password reset link sent to your email.' });
+    });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
