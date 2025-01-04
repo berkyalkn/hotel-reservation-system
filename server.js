@@ -6,6 +6,8 @@ import mysql from "mysql2";
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import nodemailer from "nodemailer";
+import session from "express-session";
+import ejs from "ejs";
 
 dotenv.config();
 
@@ -56,20 +58,28 @@ const sendEmail = (to, subject, text) => {
     });
 };
 
-const app = express();
-app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const app = express();
+app.use(express.json());
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: false }, 
+    })
+);
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));;
 });
 
 
@@ -112,6 +122,8 @@ app.post('/login', async (req, res) => {
         if (!isPasswordValid) {
             return res.status(400).json({ message: 'Invalid password!' });
         }
+
+        req.session.username = username;
 
         console.log('Login successful!');
         return res.status(200).json({ message: 'Login successful!' });
@@ -168,6 +180,14 @@ app.post('/update-password', async (req, res) => {
 
         return res.status(200).json({ message: 'Password updated successfully' });
     });
+});
+
+app.get('/dashboard', (req, res) => {
+    if (!req.session.username) {
+        return res.redirect('/login');
+    }
+
+    res.render('dashboard', { username: req.session.username });
 });
 
 const PORT = process.env.PORT || 3000;
