@@ -75,20 +75,6 @@ header .btn {
     margin-top: 1.5rem; 
 }
 
-section {
-    padding: 60px 15px;
-}
-
-section h2 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-section p {
-    color: #555;
-    font-size: 1rem;
-}
 
 .bg-light {
     background-color: #f8f9fa;
@@ -96,26 +82,6 @@ section p {
 
 .bg-white {
     background-color: white;
-}
-
-section#features .col-md-4 {
-    margin-bottom: 30px;
-}
-
-section#features i {
-    color: #007bff;
-    margin-bottom: 10px;
-}
-
-section#features h4 {
-    font-size: 1.2rem;
-    margin-top: 10px;
-    color: #333;
-}
-
-section#features p {
-    font-size: 0.9rem;
-    color: #666;
 }
 
 
@@ -135,7 +101,7 @@ footer {
     color: white;
     padding: 15px 0;
     font-size: 0.9rem;
-    margin-top: auto; /* Footer'ı en alt yapacak */
+    margin-top: auto; 
 }
 
 footer p {
@@ -150,9 +116,5 @@ footer p {
 
     header p {
         font-size: 1rem;
-    }
-
-    section h2 {
-        font-size: 1.5rem;
     }
 }
