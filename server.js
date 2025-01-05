@@ -63,6 +63,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.set('view engine', 'ejs');
@@ -184,11 +185,180 @@ app.post('/update-password', async (req, res) => {
 
 app.get('/dashboard', (req, res) => {
     if (!req.session.username) {
-        return res.redirect('/login');
+        return res.redirect('/login.html');
     }
 
     res.render('dashboard', { username: req.session.username });
 });
+
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send("Failed to log out.");
+        }
+        res.redirect('/login.html');
+    });
+});
+
+app.get('/profile', (req, res) => {
+    if (!req.session.username) {
+        return res.redirect('/login.html');
+    }
+
+    const query = `SELECT first_name, last_name, bio, phone_number, address FROM users WHERE username = ?`;
+    db.execute(query, [req.session.username], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Database error!' });
+        }
+
+        if (result.length === 0) {
+            return res.status(400).json({ message: 'User not found!' });
+        }
+
+        const user = result[0];
+
+        const message = req.session.message || null; 
+        req.session.message = null; 
+        
+        res.render('profile', { 
+            user, 
+            message});
+
+        req.session.message = null;
+    });
+});
+
+app.post('/profile', (req, res) => {
+
+   console.log(req.body);
+  
+    const { first_name, last_name, bio, phone_number, address } = req.body;
+
+    if (!first_name || !last_name || !bio || !phone_number || !address) {
+        req.session.message = {
+            type: 'danger',
+            text: 'All fields must be filled out'
+        };
+        return res.redirect('/profile');
+    }
+    
+
+    const query = `
+        UPDATE users
+        SET first_name = ?, last_name = ?, bio = ?, phone_number = ?, address = ?
+        WHERE username = ?`;
+
+        db.execute(query, [
+            first_name || null,
+            last_name || null,
+            bio || null,
+            phone_number || null,
+            address || null,
+            req.session.username
+        ], (err, result) => {
+            if (err) {
+                console.error('Database error:', err);
+                req.session.message = {
+                    type: 'danger',
+                    text: 'Database error'
+                };
+                return res.redirect('/profile');
+            }
+    
+            req.session.message = {
+                type: 'success',
+                text: 'Profile updated successfully!'
+            };
+    
+            res.redirect('/profile');
+        
+        });
+});
+
+app.get('/change-password', (req, res) => {
+    if (!req.session.username) {
+        return res.redirect('login.html'); 
+    }
+
+    const message = req.session.message || null; // Mesajı al
+    req.session.message = null; // Mesajı sıfırla
+    
+   // Kullanıcıya mesaj göndermek
+   res.render('change_password', { 
+    username: req.session.username, 
+    message});
+
+// Mesajı sıfırlıyoruz
+req.session.message = null;
+});
+
+app.post('/update-password2', async (req, res) => {
+    const { email, currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (newPassword !== confirmPassword) {
+        req.session.message = {
+            type: 'danger',
+            text: "Passwords don't match"
+        };
+        return res.redirect('/change-password');
+    }
+
+    // Şimdi mevcut şifreyi doğrulayacağız (bcrypt ile hash kontrolü)
+    db.execute('SELECT * FROM users WHERE username = ?', [req.session.username], async (err, result) => {
+        if (err) {
+            console.error(err);
+            req.session.message = {
+                type: 'danger',
+                text: 'Database error'
+            };
+            return res.redirect('/change-password');
+        }
+
+        if (result.length === 0) {
+            req.session.message = {
+                type: 'danger',
+                text: 'User not found'
+            };
+            return res.redirect('/change-password');
+        }
+
+        const user = result[0];
+        const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+
+        if (!isPasswordCorrect) {
+            req.session.message = {
+                type: 'danger',
+                text: ' Incorrect current password'
+            };
+            return res.redirect('/change-password');
+        }
+
+        // Yeni şifreyi hash'le
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Şifreyi güncelle
+        db.execute('UPDATE users SET password = ? WHERE username = ?', [hashedPassword, req.session.username], (err, result) => {
+            if (err) {
+                console.error(err);
+                req.session.message = {
+                    type: 'danger',
+                    text: 'Database error'
+                };
+                return res.redirect('/change-password');
+            }
+
+            req.session.message = {
+                type: 'success',
+                text: 'Password updated successfully'
+            };
+
+            res.redirect('/profile');
+        });
+    });
+});
+
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
