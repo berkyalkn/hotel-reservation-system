@@ -281,15 +281,15 @@ app.get('/change-password', (req, res) => {
         return res.redirect('login.html'); 
     }
 
-    const message = req.session.message || null; // Mesajı al
-    req.session.message = null; // Mesajı sıfırla
+    const message = req.session.message || null; 
+    req.session.message = null; 
     
-   // Kullanıcıya mesaj göndermek
+
    res.render('change_password', { 
     username: req.session.username, 
     message});
 
-// Mesajı sıfırlıyoruz
+
 req.session.message = null;
 });
 
@@ -304,7 +304,6 @@ app.post('/update-password2', async (req, res) => {
         return res.redirect('/change-password');
     }
 
-    // Şimdi mevcut şifreyi doğrulayacağız (bcrypt ile hash kontrolü)
     db.execute('SELECT * FROM users WHERE username = ?', [req.session.username], async (err, result) => {
         if (err) {
             console.error(err);
@@ -334,10 +333,9 @@ app.post('/update-password2', async (req, res) => {
             return res.redirect('/change-password');
         }
 
-        // Yeni şifreyi hash'le
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Şifreyi güncelle
+
         db.execute('UPDATE users SET password = ? WHERE username = ?', [hashedPassword, req.session.username], (err, result) => {
             if (err) {
                 console.error(err);
@@ -346,7 +344,7 @@ app.post('/update-password2', async (req, res) => {
                     text: 'Database error'
                 };
                 return res.redirect('/change-password');
-            }
+            } 
 
             req.session.message = {
                 type: 'success',
