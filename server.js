@@ -356,6 +356,13 @@ app.post('/update-password2', async (req, res) => {
     });
 });
 
+app.get('/about', (req, res) => {
+    res.render('about'); 
+});
+
+app.get('/contact', (req, res) => {
+    res.render('contact'); 
+});
 
 
 const PORT = process.env.PORT || 3000;
