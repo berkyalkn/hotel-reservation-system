@@ -1,3 +1,4 @@
 node_modules
 .DS_Store
 .env
+.hotel_reservation_system.sql
