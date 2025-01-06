@@ -69,7 +69,54 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+// API Routes
+app.get('/api/hotels', async (req, res) => {
+    try {
+        const { location, hotelName, guests } = req.query;
+        let query = 'SELECT * FROM hotels WHERE 1=1';
+        const params = [];
 
+        if (location && location.trim()) {
+            query += ' AND LOWER(location) LIKE LOWER(?)';
+            params.push(`%${location.trim()}%`);
+        }
+
+        if (hotelName && hotelName.trim()) {
+            query += ' AND LOWER(name) LIKE LOWER(?)';
+            params.push(`%${hotelName.trim()}%`);
+        }
+
+        if (guests && !isNaN(guests)) {
+            query += ' AND total_rooms >= ?';
+            params.push(parseInt(guests));
+        }
+
+        const [hotels] = await db.promise().query(query, params);
+
+        const formattedHotels = hotels.map(hotel => ({
+            id: hotel.id,
+            name: hotel.name,
+            location: hotel.location,
+            description: hotel.description || '',
+            price_per_night: parseFloat(hotel.price_per_night),
+            total_rooms: hotel.total_rooms,
+            image_url: hotel.image_url || 'https://via.placeholder.com/300x200?text=Hotel+Image'
+        }));
+
+        res.json({
+            success: true,
+            message: `Found ${formattedHotels.length} hotels`,
+            hotels: formattedHotels
+        });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error searching hotels',
+            error: error.message
+        });
+    }
+});
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
@@ -355,6 +402,7 @@ app.post('/update-password2', async (req, res) => {
         });
     });
 });
+
 
 app.get('/about', (req, res) => {
     res.render('about'); 
