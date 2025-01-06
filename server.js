@@ -69,54 +69,7 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
-// API Routes
-app.get('/api/hotels', async (req, res) => {
-    try {
-        const { location, hotelName, guests } = req.query;
-        let query = 'SELECT * FROM hotels WHERE 1=1';
-        const params = [];
 
-        if (location && location.trim()) {
-            query += ' AND LOWER(location) LIKE LOWER(?)';
-            params.push(`%${location.trim()}%`);
-        }
-
-        if (hotelName && hotelName.trim()) {
-            query += ' AND LOWER(name) LIKE LOWER(?)';
-            params.push(`%${hotelName.trim()}%`);
-        }
-
-        if (guests && !isNaN(guests)) {
-            query += ' AND total_rooms >= ?';
-            params.push(parseInt(guests));
-        }
-
-        const [hotels] = await db.promise().query(query, params);
-
-        const formattedHotels = hotels.map(hotel => ({
-            id: hotel.id,
-            name: hotel.name,
-            location: hotel.location,
-            description: hotel.description || '',
-            price_per_night: parseFloat(hotel.price_per_night),
-            total_rooms: hotel.total_rooms,
-            image_url: hotel.image_url || 'https://via.placeholder.com/300x200?text=Hotel+Image'
-        }));
-
-        res.json({
-            success: true,
-            message: `Found ${formattedHotels.length} hotels`,
-            hotels: formattedHotels
-        });
-    } catch (error) {
-        console.error('Database error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error searching hotels',
-            error: error.message
-        });
-    }
-});
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
@@ -412,6 +365,60 @@ app.get('/contact', (req, res) => {
     res.render('contact'); 
 });
 
+app.get('/search', (req, res) => {
+    const { destination, checkin, checkout, guests } = req.query;
+
+    let query = 'SELECT * FROM hotels WHERE 1=1';
+    let queryParams = [];
+
+    if (destination) {
+        query += ' AND (name LIKE ? OR location LIKE ?)';
+        queryParams.push(`%${destination}%`, `%${destination}%`);
+    }
+
+    if (checkin && checkout) {
+        query += ' AND (checkin_date >= ? AND checkout_date <= ?)';
+        queryParams.push(checkin, checkout);
+    }
+
+    db.execute(query, queryParams, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+        res.json({
+            hotels: result
+        });
+    });
+});
+
+app.get('/search-results', (req, res) => {
+    const { destination, checkin, checkout, guests } = req.query;
+
+    let query = 'SELECT * FROM hotels WHERE 1=1';
+    let queryParams = [];
+
+    if (destination) {
+        query += ' AND (name LIKE ? OR location LIKE ?)';
+        queryParams.push(`%${destination}%`, `%${destination}%`);
+    }
+
+    db.execute(query, queryParams, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        res.render('search', {
+            hotels: result, 
+            hotelCount: result.length,
+            destination: destination,
+            checkin: checkin,
+            checkout: checkout,
+            guests: guests
+        });
+    });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
