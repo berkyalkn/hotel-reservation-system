@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/book.css">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="/images/roomify_logo.jpeg" alt="Roomify Logo" class="logo">
+                Roomify
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="./index.html">Home Page</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-5 text-center">
+        <div class="confirmation-box shadow p-5 rounded">
+            <div class="success-icon mb-4">
+                <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success" width="80">
+            </div>
+            <h1 class="text-success mb-3">Booking Confirmed!</h1>
+            <p class="lead">Dear <strong><%= booking.name %></strong>,</p>
+            <p>Your booking at <strong><%= booking.hotel_name %></strong> has been successfully confirmed.</p>
+            <p>Email: <strong><%= booking.email %></strong></p>
+            <p>Location: <strong><%= booking.location %></strong></p>
+            <p>Check-in: <strong><%= booking.checkin_date %></strong></p>
+            <p>Check-out: <strong><%= booking.checkout_date %></strong></p>
+            <p>Guests: <strong><%= booking.guests %></strong></p>
+            <a href="/" class="btn btn-primary mt-4">Back to Home</a>
+        </div>
+    </main>
+
+    <footer class="text-center">
+        <p>© 2025 Roomify. All rights reserved.</p>
+    </footer>
+</body>
+</html>
