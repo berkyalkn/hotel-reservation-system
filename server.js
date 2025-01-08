@@ -420,6 +420,109 @@ app.get('/search-results', (req, res) => {
     });
 });
 
+app.get('/book/:id', (req, res) => {
+    const hotelId = req.params.id;
+
+    db.execute('SELECT * FROM hotels WHERE id = ?', [hotelId], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
+        }
+
+        if (result.length === 0) {
+            return res.status(404).send('Hotel not found');
+        }
+
+        res.render('book', { hotel: result[0] });
+    });
+});
+
+app.post('/book', (req, res) => {
+    const { name, email, hotel_id, checkin_date, checkout_date, guests } = req.body;
+
+    const userId = req.session.userId || null; 
+
+    const hotelQuery = `SELECT name FROM hotels WHERE id = ?`;
+    db.execute(hotelQuery, [hotel_id], (err, hotelResult) => {
+        if (err || hotelResult.length === 0) {
+            console.error(err || 'Hotel not found');
+            return res.status(500).send('Error retrieving hotel details');
+        }
+
+        const hotelName = hotelResult[0].name;
+        const location = hotelResult[0].location;
+
+        const bookingQuery = `
+            INSERT INTO bookings (user_id, hotel_id, checkin_date, checkout_date, guests, name, email)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        const params = [userId, hotel_id, checkin_date, checkout_date, guests, name, email];
+
+        db.execute(bookingQuery, params, (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Database error');
+            }
+
+            const emailText = `
+            Dear ${name},
+            
+            We are excited to confirm your booking with **Roomify**! Below are the details of your reservation:
+            
+            🏨 **Hotel Name:** ${hotelName}  
+            📍 **Location:** ${location}  
+            📅 **Check-in Date:** ${checkin_date}  
+            📆 **Check-out Date:** ${checkout_date}  
+            👥 **Number of Guests:** ${guests}  
+            
+            We are thrilled to have the opportunity to host you. Should you have any special requests or need further assistance, please don't hesitate to reach out to us.
+            
+            Thank you for choosing **Roomify** for your stay. We hope you have a pleasant experience and enjoy every moment of your trip!
+            
+            Best regards,  
+            **The Roomify Team**  
+            📧 support@roomify.com  
+            🌐 www.roomify.com  
+            📞 +90 123 456 7890
+            `;
+
+            sendEmail(email, 'Booking Confirmation', emailText)
+                .then(() => {
+                    console.log('Confirmation email sent successfully!');
+                    res.redirect(`/confirmation/${result.insertId}`);
+                })
+                .catch((error) => {
+                    console.error('Failed to send email:', error);
+                    res.status(500).send('Booking was successful but failed to send confirmation email.');
+                });
+        });
+    });
+});
+
+app.get('/confirmation/:id', (req, res) => {
+    const bookingId = req.params.id;
+
+    const query = `
+    SELECT b.id, h.name AS hotel_name, h.location, b.checkin_date, b.checkout_date, b.guests, b.name, b.email
+    FROM bookings b
+    JOIN hotels h ON b.hotel_id = h.id
+    WHERE b.id = ?
+    `;
+
+    db.execute(query, [bookingId], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
+        }
+
+        if (result.length === 0) {
+            return res.status(404).send('Booking not found');
+        }
+
+        res.render('confirmation', { booking: result[0] });
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
