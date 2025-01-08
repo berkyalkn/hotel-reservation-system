@@ -442,7 +442,7 @@ app.post('/book', (req, res) => {
 
     const userId = req.session.userId || null; 
 
-    const hotelQuery = `SELECT name FROM hotels WHERE id = ?`;
+    const hotelQuery = `SELECT name, location FROM hotels WHERE id = ?`;
     db.execute(hotelQuery, [hotel_id], (err, hotelResult) => {
         if (err || hotelResult.length === 0) {
             console.error(err || 'Hotel not found');
