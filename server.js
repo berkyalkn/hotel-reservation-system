@@ -420,6 +420,62 @@ app.get('/search-results', (req, res) => {
     });
 });
 
+app.get('/login-search', (req, res) => {
+    const { destination, checkin, checkout, guests } = req.query;
+
+    let query = 'SELECT * FROM hotels WHERE 1=1';
+    let queryParams = [];
+
+    if (destination) {
+        query += ' AND (name LIKE ? OR location LIKE ?)';
+        queryParams.push(`%${destination}%`, `%${destination}%`);
+    }
+
+    if (checkin && checkout) {
+        query += ' AND (checkin_date >= ? AND checkout_date <= ?)';
+        queryParams.push(checkin, checkout);
+    }
+
+    db.execute(query, queryParams, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+        res.json({
+            hotels: result
+        });
+    });
+});
+
+app.get('/login-search-results', (req, res) => {
+    const { destination, checkin, checkout, guests } = req.query;
+
+    let query = 'SELECT * FROM hotels WHERE 1=1';
+    let queryParams = [];
+
+    if (destination) {
+        query += ' AND (name LIKE ? OR location LIKE ?)';
+        queryParams.push(`%${destination}%`, `%${destination}%`);
+    }
+
+    db.execute(query, queryParams, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        res.render('login_search', {
+            hotels: result, 
+            hotelCount: result.length,
+            destination: destination,
+            checkin: checkin,
+            checkout: checkout,
+            guests: guests,
+            username: req.session.username
+        });
+    });
+});
+
 app.get('/hotel/:id', (req, res) => {
     const hotelId = req.params.id;
 
