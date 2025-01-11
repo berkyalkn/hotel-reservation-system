@@ -501,6 +501,31 @@ app.get('/hotel/:id', (req, res) => {
     });
 });
 
+app.get('/login-hotel/:id', (req, res) => {
+    const hotelId = req.params.id;
+
+    const query = `
+        SELECT name, location, description, price_per_night, total_rooms, image_url, 
+               facilities, rating, reviews_count, contact_email, contact_phone, address, 
+               checkin_time, checkout_time 
+        FROM hotels 
+        WHERE id = ?
+    `;
+
+    db.execute(query, [hotelId], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
+        }
+
+        if (result.length === 0) {
+            return res.status(404).send('Hotel not found');
+        }
+
+        res.render('login_hotel_details', { hotel: result[0] });
+    });
+});
+
 app.get('/book/:id', (req, res) => {
     const hotelId = req.params.id;
 
