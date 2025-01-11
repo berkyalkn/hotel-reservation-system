@@ -755,6 +755,10 @@ app.get('/login-confirmation/:id', (req, res) => {
     });
 });
 
+app.get('/bookings', (req, res) => {
+    res.render('bookings'); 
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
