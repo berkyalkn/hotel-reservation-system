@@ -125,6 +125,7 @@ app.post('/login', async (req, res) => {
         }
 
         req.session.username = username;
+        req.session.userId = result[0].id;
 
         console.log('Login successful!');
         return res.status(200).json({ message: 'Login successful!' });
@@ -756,7 +757,165 @@ app.get('/login-confirmation/:id', (req, res) => {
 });
 
 app.get('/bookings', (req, res) => {
-    res.render('bookings'); 
+    const username = req.session.username; 
+
+    const query = `
+    SELECT 
+    bookings.*, 
+    hotels.name AS hotel_name, 
+    hotels.location AS hotel_location, 
+    image_url AS hotel_image_url 
+    FROM bookings
+    INNER JOIN hotels ON bookings.hotel_id = hotels.id
+    INNER JOIN users ON bookings.user_id = users.id
+    WHERE users.username = ?`;
+
+
+    db.execute(query, [username], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
+        }
+
+        res.render('bookings', {
+            bookings: results,
+            username: username,
+        });
+    });
+});
+
+app.post('/bookings/edit/:id', (req, res) => {
+    const bookingId = req.params.id;
+    const { checkin, checkout, guests } = req.body;
+
+    const query = `SELECT * FROM bookings WHERE id = ?`;
+    db.execute(query, [bookingId], (err, result) => {
+        if (err || result.length === 0) {
+            console.error(err || 'Booking not found');
+            return res.status(500).send('Error retrieving booking details');
+        }
+
+        const booking = result[0];
+        const { name, email, hotel_id } = booking;
+
+        const hotelQuery = `SELECT name, location FROM hotels WHERE id = ?`;
+        db.execute(hotelQuery, [hotel_id], (err, hotelResult) => {
+            if (err || hotelResult.length === 0) {
+                console.error(err || 'Hotel not found');
+                return res.status(500).send('Error retrieving hotel details');
+            }
+
+            const hotelName = hotelResult[0].name;
+            const location = hotelResult[0].location;
+
+            const updateQuery = `
+                UPDATE bookings 
+                SET checkin_date = ?, checkout_date = ?, guests = ? 
+                WHERE id = ?`;
+            const params = [checkin, checkout, guests, bookingId];
+
+            db.execute(updateQuery, params, (err) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Database error');
+                }
+
+                const emailText = `
+                Dear ${name},
+
+                Your booking for **${hotelName}** has been successfully updated. Below are the updated details:
+
+                🏨 **Hotel Name:** ${hotelName}  
+                📍 **Location:** ${location}  
+                📅 **New Check-in Date:** ${checkin}  
+                📆 **New Check-out Date:** ${checkout}  
+                👥 **Number of Guests:** ${guests}  
+
+                If you need further changes or have any questions, feel free to contact us.
+
+                Warm regards,  
+                **The Roomify Team**  
+                📧 support@roomify.com  
+                🌐 www.roomify.com  
+                📞 +90 123 456 7890
+                `;
+
+                sendEmail(email, 'Booking Updated', emailText)
+                    .then(() => {
+                        console.log('Update email sent successfully!');
+                        res.redirect('/bookings');
+                    })
+                    .catch((error) => {
+                        console.error('Failed to send update email:', error);
+                        res.status(500).send('Booking was updated but failed to send confirmation email.');
+                    });
+            });
+        });
+    });
+});
+
+app.post('/bookings/cancel/:id', (req, res) => {
+    const bookingId = req.params.id;
+
+    const query = `SELECT * FROM bookings WHERE id = ?`;
+    db.execute(query, [bookingId], (err, result) => {
+        if (err || result.length === 0) {
+            console.error(err || 'Booking not found');
+            return res.status(500).send('Error retrieving booking details');
+        }
+
+        const booking = result[0];
+        const { name, email, hotel_id } = booking;
+
+        const hotelQuery = `SELECT name, location FROM hotels WHERE id = ?`;
+        db.execute(hotelQuery, [hotel_id], (err, hotelResult) => {
+            if (err || hotelResult.length === 0) {
+                console.error(err || 'Hotel not found');
+                return res.status(500).send('Error retrieving hotel details');
+            }
+
+            const hotelName = hotelResult[0].name;
+            const location = hotelResult[0].location;
+
+            const deleteQuery = 'DELETE FROM bookings WHERE id = ?';
+            db.execute(deleteQuery, [bookingId], (err) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Database error');
+                }
+
+                const emailText = `
+                Dear ${name},
+
+                We regret to inform you that your booking for **${hotelName}** has been successfully cancelled. Below are the details:
+
+                🏨 **Hotel Name:** ${hotelName}  
+                📍 **Location:** ${location}  
+                📅 **Check-in Date:** ${booking.checkin_date}  
+                📆 **Check-out Date:** ${booking.checkout_date}  
+                👥 **Number of Guests:** ${booking.guests}  
+
+                If you change your mind or need assistance, feel free to reach out to us.
+
+                Warm regards,  
+                **The Roomify Team**  
+                📧 support@roomify.com  
+                🌐 www.roomify.com  
+                📞 +90 123 456 7890
+                `;
+
+                sendEmail(email, 'Booking Cancelled', emailText)
+                    .then(() => {
+                        console.log('Cancellation email sent successfully!');
+                        res.redirect('/bookings');
+                    })
+                    .catch((error) => {
+                        console.error('Failed to send cancellation email:', error);
+                        res.status(500).send('Booking was cancelled but failed to send cancellation email.');
+                    });
+            });
+        });
+    });
 });
 
 const PORT = process.env.PORT || 3000;
