@@ -1,0 +1,94 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f8fb;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.navbar-brand .logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: #555;
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #007bff;
+}
+
+footer {
+    background: #007bff;
+    color: white;
+    padding: 15px 0;
+    font-size: 0.9rem;
+    margin-top: auto; 
+    text-align: center;
+}
+
+footer p {
+    margin: auto;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.hotel-image {
+    max-height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #ddd;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.card-text strong {
+    color: #000;
+}
+
+.card .btn {
+    border-radius: 30px;
+    background-color: #007bff;
+    padding: 12px 20px;  
+    font-size: 1rem; 
+    transition: background-color 0.3s, transform 0.3s; 
+}
+
+
+.card .btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05); 
+}
+
+
+.modal .modal-content {
+    border-radius: 10px;
+}
