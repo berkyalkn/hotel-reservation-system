@@ -363,7 +363,35 @@ app.get('/about', (req, res) => {
 });
 
 app.get('/contact', (req, res) => {
-    res.render('contact'); 
+    res.render('contact')
+});
+
+app.post('/contact', (req, res) => {
+    const { name, message} = req.body; 
+    
+    sendEmail(process.env.GMAIL_USER, 'New Message from Contact Form', `
+        You have received a new message from the contact form:
+
+        Name: ${name}
+        Message: 
+
+        "${message}"
+        
+        Best regards,
+        Roomify Team
+    `)
+    .then(() => {
+        res.json({
+            success: true,
+            message: 'Your message has been sent successfully! We will get back to you soon.'
+        });
+    })
+    .catch((error) => {
+        res.json({
+            success: false,
+            message: 'Oops! Something went wrong. Please try again later.'
+        });
+    });
 });
 
 app.get('/search', (req, res) => {
