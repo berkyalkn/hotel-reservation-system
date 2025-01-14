@@ -80,7 +80,11 @@ app.use(
 );
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.render("index");
+});
+
+app.get('/register', (req, res) => {
+    res.render("register");
 });
 
 
@@ -101,6 +105,10 @@ app.post('/register', async (req, res) => {
         }
         return res.status(200).json({ message: 'Registration successful!' });
     });
+});
+
+app.get('/login', (req, res) => {
+    res.render("login");
 });
 
 app.post('/login', async (req, res) => {
@@ -130,6 +138,10 @@ app.post('/login', async (req, res) => {
         console.log('Login successful!');
         return res.status(200).json({ message: 'Login successful!' });
     });
+});
+
+app.get('/reset-password', (req, res) => {
+    res.render('reset_password');
 });
 
 
@@ -162,7 +174,7 @@ app.post('/reset-password', (req, res) => {
 
 
 app.get('/reset-password2', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'reset_password2.html'));
+    res.render('reset_password2');
 });
 
 app.post('/update-password', async (req, res) => {
@@ -197,7 +209,7 @@ app.post('/logout', (req, res) => {
         if (err) {
             return res.status(500).send("Failed to log out.");
         }
-        res.redirect('/login.html');
+        res.redirect('/login');
     });
 });
 
