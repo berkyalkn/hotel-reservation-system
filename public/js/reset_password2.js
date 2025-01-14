@@ -32,7 +32,7 @@ document.getElementById('update-password-form').addEventListener('submit', async
 
         setTimeout(() => {
             clearMessages();
-            window.location.href = 'login.html';
+            window.location.href = '/login';
             }, 3000);
     } else {
         errorMessage.style.display = 'block';

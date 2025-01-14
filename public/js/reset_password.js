@@ -30,7 +30,7 @@ document.getElementById("reset-form").addEventListener("submit", async function(
 
             setTimeout(() => {
                 clearMessages();
-                window.location.href = 'login.html';
+                window.location.href = '/login';
             }, 3000);
         } else {
             errorMessage.style.display = 'block';

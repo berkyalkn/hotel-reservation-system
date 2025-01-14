@@ -48,7 +48,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
 
             setTimeout(() => {
                 clearMessages();
-                window.location.href = 'login.html';
+                window.location.href = '/login';
             }, 3000);
         } else {
             errorMessage.style.display = 'block';
