@@ -177,6 +177,7 @@ app.get('/reset-password2', (req, res) => {
     res.render('reset_password2');
 });
 
+
 app.post('/update-password', async (req, res) => {
     const { email, newPassword } = req.body;
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -198,7 +199,7 @@ app.post('/update-password', async (req, res) => {
 
 app.get('/dashboard', (req, res) => {
     if (!req.session.username) {
-        return res.redirect('/login.html');
+        return res.redirect('/login');
     }
 
     res.render('dashboard', { username: req.session.username });
@@ -215,7 +216,7 @@ app.post('/logout', (req, res) => {
 
 app.get('/profile', (req, res) => {
     if (!req.session.username) {
-        return res.redirect('/login.html');
+        return res.redirect('/login');
     }
 
     const query = `SELECT first_name, last_name, bio, phone_number, address FROM users WHERE username = ?`;
@@ -291,7 +292,7 @@ app.post('/profile', (req, res) => {
 
 app.get('/change-password', (req, res) => {
     if (!req.session.username) {
-        return res.redirect('login.html'); 
+        return res.redirect('/login'); 
     }
 
     const message = req.session.message || null; 
@@ -405,6 +406,7 @@ app.post('/contact', (req, res) => {
         });
     });
 });
+
 
 app.get('/search', (req, res) => {
     const { destination, checkin, checkout, guests } = req.query;
