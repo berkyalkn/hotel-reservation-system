@@ -198,11 +198,40 @@ app.post('/update-password', async (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-    if (!req.session.username) {
-        return res.redirect('/login');
-    }
+    const offers = [
+        {
+            title: "20% Off on Beach Resorts",
+            description: "Take advantage of this limited-time offer and enjoy a fantastic 20% discount on selected beach resorts. Whether you're looking for a peaceful getaway or an adventurous beach experience, our beach resorts offer the perfect combination of relaxation and activities. Book your stay before the end of the month to secure this amazing deal!",
+            link: "/offers/beach-resorts",
+            hotels: [
+                'Sunset Resort & Spa',
+                'Seaside Paradise Hotel',
+                'Beachside Resort',
+                'Pacific Coast Resort'
+            ]
+        },
+        {
+            title: "Last Minute Deals",
+            description: "Hurry, don't miss out on last-minute deals for your next vacation! Get up to 50% off on select hotels for bookings made within 48 hours. This is the perfect opportunity for spontaneous travelers who want to save big while still enjoying top-notch accommodations. Whether you're planning a weekend getaway or a quick business trip, these deals are perfect for those who act fast.",
+            link: "/offers/last-minute",
+            hotels: [
+                'Urban Comfort Inn',
+                'Mountain View Lodge',
+                'Historic Downtown Hotel',
+                'City Center Suites'
+            ]
+        },
+        {
+            title: "Early Bird Discounts",
+            description: "Be smart and plan your vacation early with our Early Bird Discounts. Book your stay now and enjoy exclusive savings of up to 30% off on premium hotels. This offer is designed for early planners who want the best rooms at the best prices. Don’t wait too long, as these discounts are only available for a limited time. Book now and guarantee your spot at some of the most luxurious resorts!",
+            link: "/offers/early-bird",
+            hotels: [
+                'For All Hotels'
+            ]
+        },
+    ];
 
-    res.render('dashboard', { username: req.session.username });
+    res.render('dashboard', { username: req.session.username, offers });
 });
 
 app.post('/logout', (req, res) => {
