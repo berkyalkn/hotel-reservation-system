@@ -41,9 +41,78 @@
     </div>
 </header>
 
+<section class="special-offers mt-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Special Offers</h2>
+        <div class="row">
+            <% offers.forEach((offer, index) => { %>
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h4 class="card-title"><%= offer.title %></h4>
+                            <p class="card-text"><%= offer.description.substring(0, 150) %>...</p>
+                            <button 
+                                class="btn btn-primary view-details-btn" 
+                                data-index="<%= index %>">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <div id="offers-data" data-offers="<%= JSON.stringify(offers) %>"></div>
+
+    <div id="offer-details" class="mt-5" style="display: none;">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 id="offer-title"></h4>
+                <p id="offer-description"></p>
+                <p><strong>Hotels included in this offer:</strong></p>
+                <ul id="offer-hotels">
+                    
+                </ul>
+                <button class="btn btn-secondary" id="close-details">Close</button>
+            </div>
+        </div>
+    </div>
+</section>
+
 <%- include('partials/footer') %>    
 
 <script src="/js/login_search.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const offersDataElement = document.getElementById('offers-data');
+        const offers = JSON.parse(offersDataElement.getAttribute('data-offers')); 
+        const detailsDiv = document.getElementById('offer-details');
+        const titleElement = document.getElementById('offer-title');
+        const descriptionElement = document.getElementById('offer-description');
+        const hotelsList = document.getElementById('offer-hotels');
+        const closeButton = document.getElementById('close-details');
+
+
+        document.querySelectorAll('.view-details-btn').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                const index = event.target.getAttribute('data-index');
+                const offer = offers[index];
+
+                titleElement.textContent = offer.title;
+                descriptionElement.textContent = offer.description;
+                hotelsList.innerHTML = offer.hotels.map(hotel => `<li>${hotel}</li>`).join('');
+
+                detailsDiv.style.display = 'block';
+                window.scrollTo({ top: detailsDiv.offsetTop, behavior: 'smooth' });
+            });
+        });
+
+        closeButton.addEventListener('click', () => {
+            detailsDiv.style.display = 'none';
+        });
+    });
+</script>
 </body>
 </html>
