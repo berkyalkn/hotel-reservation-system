@@ -33,7 +33,6 @@ body {
     color: #007bff;
 }
 
-
 header {
     background: linear-gradient(to right, #007bff, #0056b3);
     color: white;
@@ -75,7 +74,6 @@ header .btn {
     margin-top: 1.5rem; 
 }
 
-
 .bg-light {
     background-color: #f8f9fa;
 }
@@ -83,7 +81,6 @@ header .btn {
 .bg-white {
     background-color: white;
 }
-
 
 form .form-control {
     border-radius: 5px;
@@ -108,7 +105,6 @@ footer p {
     margin: 0;
 }
 
-
 @media (max-width: 768px) {
     header h1 {
         font-size: 2rem;
@@ -116,5 +112,98 @@ footer p {
 
     header p {
         font-size: 1rem;
+    }
+}
+
+.special-offers {
+    padding: 40px 0;
+    background-color: #f9f9f9;
+}
+
+.special-offers h2 {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+.special-offers .card {
+    border: none;
+    border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.special-offers .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.special-offers .card-title {
+    font-size: 1.25rem;
+    color: #333;
+}
+
+.special-offers .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.special-offers .btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+#offer-details {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+#offer-details .card {
+    border: none;
+}
+
+#offer-details h4 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+#offer-details p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+#offer-details ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#offer-details ul li {
+    font-size: 1rem;
+    color: #333;
+    padding: 5px 0;
+}
+
+#offer-details .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#offer-details .btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .special-offers .card {
+        margin-bottom: 20px;
+    }
+
+    #offer-details .btn-secondary {
+        width: 100%;
+        padding: 12px 20px;
     }
 }
