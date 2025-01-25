@@ -73,5 +73,10 @@ Once the setup is complete, you can access the following features based on your 
 + For Guests: Make reservations, view hotel details, and more.
 + For Logged-in Users: Access personalized features like profile management, reservation history, and booking modifications.
 
+### Documentation  
+- [Software Requirements Specification (SRS)](docs/CMPE331_PHASE1_SRS_v01_ROOMIFY.pdf)  
+- [UML Diagrams](docs/CMPE331_PHASE2_UML_v01_ROOMIFY.pdf)  
+
+
 ## License
 This project is open-source and available under the MIT License.
