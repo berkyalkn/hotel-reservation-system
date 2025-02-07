@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import nodemailer from "nodemailer";
 import session from "express-session";
 import ejs from "ejs";
+import { hash } from "crypto";
 
 dotenv.config();
 
@@ -87,24 +88,35 @@ app.get('/register', (req, res) => {
     res.render("register");
 });
 
+const saltRounds = 10;
 
 app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+    bcrypt.hash(password, saltRounds, (err, hash) => {
+        
+        if(err) {
+            console.log("Error hashing password : ", err);
+        } else {
+        const query = `INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, NOW())`;
 
-    const query = `INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, NOW())`;
-
-    db.execute(query, [username, email, hashedPassword], (err, result) => {
-        if (err) {
-            if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(400).json({ message: 'Username already exists!' });
+        db.execute(query, [username, email, hash], (err, result) => {
+            if (err) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(400).json({ message: 'Username already exists!' });
+                }
+                console.error(err);
+                return res.status(500).json({ message: 'Database error!' });
             }
-            console.error(err);
-            return res.status(500).json({ message: 'Database error!' });
-        }
-        return res.status(200).json({ message: 'Registration successful!' });
+            return res.status(200).json({ message: 'Registration successful!' });
+         
+        });
+    }
     });
+} catch (err) {
+    console.log(err);
+}
 });
 
 app.get('/login', (req, res) => {
@@ -180,7 +192,7 @@ app.get('/reset-password2', (req, res) => {
 
 app.post('/update-password', async (req, res) => {
     const { email, newPassword } = req.body;
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
     const query = `UPDATE users SET password = ? WHERE email = ?`;
     db.execute(query, [hashedPassword, email], (err, result) => {
@@ -376,7 +388,7 @@ app.post('/update-password2', async (req, res) => {
             return res.redirect('/change-password');
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
 
         db.execute('UPDATE users SET password = ? WHERE username = ?', [hashedPassword, req.session.username], (err, result) => {
