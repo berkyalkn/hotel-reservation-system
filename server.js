@@ -76,9 +76,12 @@ app.use(
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: true,
-        cookie: { secure: false }, 
+        cookie: {
+             maxAge: 1000 * 60 * 60 * 12 ,
+            }, 
     })
 );
+
 
 app.get('/', (req, res) => {
     res.render("index");
@@ -217,7 +220,12 @@ app.post('/update-password', async (req, res) => {
     });
 });
 
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard',(req, res) => {
+
+    if (!req.session.username) {
+        return res.redirect('/login');
+    }
+
     const offers = [
         {
             title: "20% Off on Beach Resorts",
@@ -263,7 +271,7 @@ app.post('/logout', (req, res) => {
     });
 });
 
-app.get('/profile', (req, res) => {
+app.get('/profile',(req, res) => {
     if (!req.session.username) {
         return res.redirect('/login');
     }
@@ -421,10 +429,19 @@ app.post('/update-password2', async (req, res) => {
 
 
 app.get('/about', (req, res) => {
+    
+    if (!req.session.username) {
+        return res.redirect('/login'); 
+    }
+
     res.render('about'); 
 });
 
 app.get('/contact', (req, res) => {
+
+    if (!req.session.username) {
+        return res.redirect('/login'); 
+    }
     res.render('contact')
 });
 
@@ -513,6 +530,11 @@ app.get('/search-results', (req, res) => {
 });
 
 app.get('/login-search', (req, res) => {
+
+    if (!req.session.username) {
+        return res.redirect('/login'); 
+    }
+
     const { destination, checkin, checkout, guests } = req.query;
 
     let query = 'SELECT * FROM hotels WHERE 1=1';
@@ -540,6 +562,11 @@ app.get('/login-search', (req, res) => {
 });
 
 app.get('/login-search-results', (req, res) => {
+
+    if (!req.session.username) {
+        return res.redirect('/login'); 
+    }
+
     const { destination, checkin, checkout, guests } = req.query;
 
     let query = 'SELECT * FROM hotels WHERE 1=1';
@@ -594,6 +621,11 @@ app.get('/hotel/:id', (req, res) => {
 });
 
 app.get('/login-hotel/:id', (req, res) => {
+
+    if (!req.session.username) {
+        return res.redirect('/login'); 
+    }
+
     const hotelId = req.params.id;
 
     const query = `
@@ -698,6 +730,11 @@ app.post('/book', (req, res) => {
 });
 
 app.get('/login-book/:id', (req, res) => {
+
+    if (!req.session.username) {
+        return res.redirect('/login'); 
+    }
+
     const hotelId = req.params.id;
     const username = req.session.username;
 
@@ -824,6 +861,11 @@ app.get('/confirmation/:id', (req, res) => {
 });
 
 app.get('/login-confirmation/:id', (req, res) => {
+
+    if (!req.session.username) {
+        return res.redirect('/login'); 
+    }
+
     const bookingId = req.params.id;
 
     const query = `
@@ -848,6 +890,10 @@ app.get('/login-confirmation/:id', (req, res) => {
 });
 
 app.get('/bookings', (req, res) => {
+
+     if (!req.session.username) {
+        return res.redirect('/login'); 
+    }
     const username = req.session.username; 
 
     const query = `
