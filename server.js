@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
 import nodemailer from "nodemailer";
 import session from "express-session";
 import ejs from "ejs";
-import { hash } from "crypto";
+
 
 dotenv.config();
 
@@ -90,33 +90,41 @@ app.get('/register', (req, res) => {
 
 const saltRounds = 10;
 
-app.post('/register', async (req, res) => {
+app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
 
-    try {
-    bcrypt.hash(password, saltRounds, (err, hash) => {
-        
-        if(err) {
-            console.log("Error hashing password : ", err);
-        } else {
-        const query = `INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, NOW())`;
+    db.execute("SELECT * FROM users WHERE username = ? OR email = ?", [username, email], (err, existingUser) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ message: 'Database error!' });
+        }
 
-        db.execute(query, [username, email, hash], (err, result) => {
-            if (err) {
-                if (err.code === 'ER_DUP_ENTRY') {
-                    return res.status(400).json({ message: 'Username already exists!' });
-                }
-                console.error(err);
-                return res.status(500).json({ message: 'Database error!' });
+        if (existingUser.length > 0) {
+            if (existingUser[0].username === username) {
+                return res.status(400).json({ message: 'Username already exists!' });
             }
-            return res.status(200).json({ message: 'Registration successful!' });
-         
+            if (existingUser[0].email === email) {
+                return res.status(400).json({ message: 'Email already exists!' });
+            }
+        }
+
+        bcrypt.hash(password, saltRounds, (err, hash) => {
+            if (err) {
+                console.log("Error hashing password : ", err);
+                return res.status(500).json({ message: 'Error hashing password!' });
+            }
+
+            const query = `INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, NOW())`;
+            db.execute(query, [username, email, hash], (err, result) => {
+                if (err) {
+                    console.error("Database error:", err);
+                    return res.status(500).json({ message: 'Database error!' });
+                }
+
+                return res.status(200).json({ message: 'Registration successful!' });
+            });
         });
-    }
     });
-} catch (err) {
-    console.log(err);
-}
 });
 
 app.get('/login', (req, res) => {
