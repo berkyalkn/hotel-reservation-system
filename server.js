@@ -8,6 +8,8 @@ import bcrypt from 'bcryptjs';
 import nodemailer from "nodemailer";
 import session from "express-session";
 import ejs from "ejs";
+import passport from "passport";
+import GoogleStrategy from "passport-google-oauth2";
 
 
 dotenv.config();
@@ -1054,6 +1056,62 @@ app.post('/bookings/cancel/:id', (req, res) => {
         });
     });
 });
+
+passport.use(
+    "google",
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: "http://localhost:3000/auth/google/secrets",
+        userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+      },
+      async (accessToken, refreshToken, profile, cb) => {
+        try {
+          console.log(profile);
+  
+          const email = profile.emails[0].value;
+          const query = "SELECT * FROM users WHERE email = ?";
+          
+          db.execute(query, [email], async (err, result) => {
+            if (err) {
+              return cb(err);
+            }
+  
+            if (result.length === 0) {
+              const insertQuery =
+                "INSERT INTO users (email, password) VALUES (?, ?)";
+              db.execute(insertQuery, [email, "google"], (insertErr, insertResult) => {
+                if (insertErr) {
+                  return cb(insertErr);
+                }
+  
+                const newUser = { id: insertResult.insertId, email };
+                return cb(null, newUser);
+              });
+            } else {
+              return cb(null, result[0]);
+            }
+          });
+        } catch (err) {
+          return cb(err);
+        }
+      }
+    )
+  );
+
+  passport.serializeUser((user, cb) => {
+    cb(null, user.id); 
+  });
+  
+  passport.deserializeUser((id, cb) => {
+    db.execute("SELECT * FROM users WHERE id = ?", [id], (err, result) => {
+      if (err) return cb(err);
+      return cb(null, result[0]); 
+    });
+  });
+  
+  
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
