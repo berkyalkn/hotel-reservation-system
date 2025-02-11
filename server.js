@@ -84,6 +84,21 @@ app.use(
     })
 );
 
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, cb) => {
+    cb(null, user.id); 
+  });
+  
+  passport.deserializeUser((id, cb) => {
+    db.execute("SELECT * FROM users WHERE id = ?", [id], (err, result) => {
+      if (err) return cb(err);
+      return cb(null, result[0]); 
+    });
+  });
+  
+
 
 app.get('/', (req, res) => {
     res.render("index");
@@ -278,7 +293,7 @@ app.get('/profile',(req, res) => {
         return res.redirect('/login');
     }
 
-    const query = `SELECT first_name, last_name, bio, phone_number, address FROM users WHERE username = ?`;
+    const query = `SELECT first_name, last_name, bio, phone_number, address FROM users WHERE username  =  ?`;
     db.execute(query, [req.session.username], (err, result) => {
         if (err) {
             console.error(err);
@@ -1100,19 +1115,7 @@ passport.use(
     )
   );
 
-  passport.serializeUser((user, cb) => {
-    cb(null, user.id); 
-  });
   
-  passport.deserializeUser((id, cb) => {
-    db.execute("SELECT * FROM users WHERE id = ?", [id], (err, result) => {
-      if (err) return cb(err);
-      return cb(null, result[0]); 
-    });
-  });
-  
-  
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
